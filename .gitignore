@@ -39,3 +39,9 @@ dist/**/*
 
 # ignore yarn.lock
 yarn.lock
+
+.idea/
+.vscode/
+node_modules/
+build/
+temp/
