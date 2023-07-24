@@ -9,9 +9,22 @@ export async function saveQuote(quote: string, queryAuthor: Author) {
         newQuote.content = quote;
         newQuote.generatedAt = new Date();
         newQuote.author = queryAuthor;
-        const quoteRepository = AppDataSource.getRepository(Quote);
-        await quoteRepository.save(newQuote);
+        await AppDataSource.getRepository(Quote).save(newQuote);
+        await AppDataSource.getRepository(Author).save(queryAuthor);
         return newQuote;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export async function saveAuthor(author: string) {
+    try {
+        const newAuthor: Author = new Author();
+        newAuthor.name = author;
+        newAuthor.generatedAt = new Date();
+        await AppDataSource.getRepository(Author).save(newAuthor);
+        return newAuthor;
     } catch (error) {
         console.log(error);
         return null;

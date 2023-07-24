@@ -3,21 +3,26 @@ import "reflect-metadata"
 import { AppDataSource } from '../services/typeorm/data-source';
 import { Author } from '../services/typeorm/entity/Author';
 import { Quote } from '../services/typeorm/entity/Quote';
-import { saveQuote } from '../helper/helper.Quote';
+import { saveQuote, saveAuthor } from '../helper/helperFunctions';
 
 export const router: Express = express();
 
 router.use(express.json());
 
 router.get('/', async (_, res: Response) => {
-    const queryQuote = await AppDataSource.getRepository(Quote).createQueryBuilder('quote').orderBy('quote.generatedAt', 'DESC').leftJoinAndSelect('quote.author', 'author').getOne();
-
-    if (queryQuote === undefined || queryQuote === null) {
-        res.status(404).send('Not found');
+    const queryQuote = await AppDataSource.getRepository(Quote).find({
+        relations: ['author'],
+        order: {
+            generatedAt: 'DESC'
+        },
+        take: 1,
+    });
+    console.log(queryQuote);
+    if (queryQuote.length === 0 || queryQuote[0] === undefined) {
+        res.status(404).send('No quotes found');
         console.log('No quotes found');
     } else {
-        const quote: Quote = queryQuote;
-        console.log(queryQuote.author.name)
+        const quote: Quote = queryQuote[0];
         res.status(200).send(`Latest quote=> Author: ${quote.author.name}, content: ${quote.content}`);
         console.log(`Latest quote=> Author: ${quote.author.name}, content: ${quote.content}`);
     }
@@ -28,40 +33,21 @@ router.post('/', async (req: Request, res: Response) => {
     const quote: string  = req.body.quote;
 
     if (typeof author !== 'string' || typeof quote !== 'string') {
+        console.log('Bad request');
         res.status(400).send('Bad request');
-        return;
     }
     try {
         const queryAuthor = await AppDataSource.getRepository(Author).findOneBy({ name: author });
         if (queryAuthor === undefined || queryAuthor === null) {
-            const newAuthor: Author = new Author();
-            newAuthor.name = author;
-            newAuthor.generatedAt = new Date();
-            const authorRepository = AppDataSource.getRepository(Author);
-            await authorRepository.save(newAuthor);
-            const newQuote = await saveQuote(quote, newAuthor);
-            if (newQuote != null) {
-                newAuthor.quotes = [newQuote];
-                await authorRepository.save(newAuthor);
-                console.log(`Quote: "${quote}" has been saved and author ${author} has been created`);
-            }
+            const newAuthor: Author | null = await saveAuthor(author);
+            if (newAuthor !== null) await saveQuote(quote, newAuthor);
+            res.send(`Quote: "${quote}" has been saved and author ${author} has been created.`);
         } else {
-            const newQuote = await saveQuote(quote, queryAuthor);
-            if (newQuote != null) {
-                queryAuthor.quotes.push(newQuote);
-                const authorRepository = AppDataSource.getRepository(Author);
-                await authorRepository.save(queryAuthor);
-                console.log(`Quote: "${quote}" has been saved and author ${author} has been updated`);
-            }
+            await saveQuote(quote, queryAuthor);
+            res.send(`Quote: "${quote}" by ${author} has been saved.`);
         }
-        // const queryQuote = await AppDataSource.getRepository(Quote).findOneBy({ content: quote });
-        // if ((queryQuote === undefined || queryQuote === null) && queryAuthor != null) {
-        //     await saveQuote(quote, queryAuthor);
-        //     console.log(`Quote: "${quote}" has been saved`);
-        // } else {
-        //     console.log(`Quote "${quote}" already exists`);
-        // }
     } catch (error) {
         console.log(error);
+        res.status(500).send('Internal server error');
     }
 });
