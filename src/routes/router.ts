@@ -10,18 +10,16 @@ export const router: Express = express();
 router.use(express.json());
 
 router.get('/', async (_, res: Response) => {
-    const queryQuote = await AppDataSource.getRepository(Quote).find( {
-        order: {
-            generatedAt: "DESC"
-        },
-        take: 1
-    });
+    const queryQuote = await AppDataSource.getRepository(Quote).createQueryBuilder('quote').orderBy('quote.generatedAt', 'DESC').leftJoinAndSelect('quote.author', 'author').getOne();
+
     if (queryQuote === undefined || queryQuote === null) {
         res.status(404).send('Not found');
         console.log('No quotes found');
     } else {
-        res.status(200).send(queryQuote);
-        console.log('Latest quote sent');
+        const quote: Quote = queryQuote;
+        console.log(queryQuote.author.name)
+        res.status(200).send(`Latest quote=> Author: ${quote.author.name}, content: ${quote.content}`);
+        console.log(`Latest quote=> Author: ${quote.author.name}, content: ${quote.content}`);
     }
 });
 
@@ -38,6 +36,7 @@ router.post('/', async (req: Request, res: Response) => {
         if (queryAuthor === undefined || queryAuthor === null) {
             const newAuthor: Author = new Author();
             newAuthor.name = author;
+            newAuthor.generatedAt = new Date();
             const authorRepository = AppDataSource.getRepository(Author);
             await authorRepository.save(newAuthor);
             const newQuote = await saveQuote(quote, newAuthor);
@@ -55,13 +54,13 @@ router.post('/', async (req: Request, res: Response) => {
                 console.log(`Quote: "${quote}" has been saved and author ${author} has been updated`);
             }
         }
-        const queryQuote = await AppDataSource.getRepository(Quote).findOneBy({ content: quote });
-        if ((queryQuote === undefined || queryQuote === null) && queryAuthor != null) {
-            await saveQuote(quote, queryAuthor);
-            console.log(`Quote: "${quote}" has been saved`);
-        } else {
-            console.log(`Quote "${quote}" already exists`);
-        }
+        // const queryQuote = await AppDataSource.getRepository(Quote).findOneBy({ content: quote });
+        // if ((queryQuote === undefined || queryQuote === null) && queryAuthor != null) {
+        //     await saveQuote(quote, queryAuthor);
+        //     console.log(`Quote: "${quote}" has been saved`);
+        // } else {
+        //     console.log(`Quote "${quote}" already exists`);
+        // }
     } catch (error) {
         console.log(error);
     }
