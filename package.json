@@ -6,21 +6,25 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/index.ts",
-    "dev": "nodemon --exec ts-node src/index.ts"
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "tracing": "ts-node -r ./src/services/tracing.ts src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@honeycombio/opentelemetry-node": "^0.5.0",
+    "@opentelemetry/api": "^1.4.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.38.0",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.17",
+    "@types/pg": "^8.10.2",
     "express": "^4.18.2",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6",
     "pg": "^8.11.1",
     "reflect-metadata": "^0.1.13",
+    "ts-node": "^10.9.1",
     "typeorm": "^0.3.17",
-    "@types/pg": "^8.10.2"
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

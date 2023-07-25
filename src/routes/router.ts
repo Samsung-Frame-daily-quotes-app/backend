@@ -17,7 +17,6 @@ router.get('/', async (_, res: Response) => {
         },
         take: 1,
     });
-    console.log(queryQuote);
     if (queryQuote.length === 0 || queryQuote[0] === undefined) {
         res.status(404).send('No quotes found');
         console.log('No quotes found');
