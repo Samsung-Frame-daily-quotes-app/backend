@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import 'reflect-metadata';
 import { AppDataSource } from '../src/services/typeorm/data-source';
 import { router } from './routes/router';
+import { graphqlRouter } from './routes/graphqlRouter';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const app: Express = express();
 const PORT = process.env.PORT || 3000;
 
 app.use('/', router);
+app.use('/graphql', graphqlRouter);
 
 async function main() {
     try {
