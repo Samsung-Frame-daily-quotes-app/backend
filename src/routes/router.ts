@@ -6,8 +6,6 @@ import { Quote } from '../services/typeorm/entity/Quote';
 import { saveQuote, saveAuthor } from '../helper/helperFunctions';
 import { register, httpRequestTimer, requestCounter } from '../services/monitoring/metrics';
 
-//discord webhook ako funguje
-
 export const router: Express = express();
 
 router.use(express.json());
