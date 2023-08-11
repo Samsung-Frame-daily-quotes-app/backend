@@ -32,11 +32,11 @@ router.get('/', async (req: Request, res: Response) => {
         });
         if (queryQuote.length === 0 || queryQuote[0] === undefined) {
             res.status(404).send('No quotes found');
-            console.log('No quotes found');
+            //console.log('No quotes found');
         } else {
             const quote: Quote = queryQuote[0];
             res.status(200).send(`Latest quote=> Author: ${quote.author.name}, content: ${quote.content}`);
-            console.log(`Latest quote=> Author: ${quote.author.name}, content: ${quote.content}`);
+            //console.log(`Latest quote=> Author: ${quote.author.name}, content: ${quote.content}`);
         }
     } catch (error) {
         console.log(error);
